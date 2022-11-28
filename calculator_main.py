@@ -49,10 +49,10 @@ class Main(QDialog):
         button_backspace = QPushButtonOperation("<=")
         button_clear = QPushButtonOperation("C")
         button_clear_entry = QPushButtonOperation("CE")
-        button_mod = QPushButtonOperation("%")
+        button_per = QPushButtonOperation("%")
 
         ### addWidget ot layout_top_first
-        layout_top_first.addWidget(button_mod)
+        layout_top_first.addWidget(button_per)
         layout_top_first.addWidget(button_clear_entry)
         layout_top_first.addWidget(button_clear)
         layout_top_first.addWidget(button_backspace)
@@ -61,7 +61,7 @@ class Main(QDialog):
         button_backspace.clicked.connect(self.button_backspace_clicked)
         button_clear.clicked.connect(self.button_clear_clicked)
         button_clear_entry.clicked.connect(self.button_clear_entry_clicked)
-        #button_mod.clicked.connect(self.button_negate_clicked)
+        button_per.clicked.connect(self.button_per_clicked)
 
 
 
@@ -79,10 +79,10 @@ class Main(QDialog):
         layout_top_second.addWidget(button_division)
 
         ### function - later
-        #button_reverse.clicked.connect(self.button_reverse_clicked)
-        #button_pow.clicked.connect(self.button_pow_clicked)
-        #button_sqrt.clicked.connect(self.button_sqrt_clicked)
-        button_division.clicked.connect(lambda state, operation = "/": self.button_operation_clicked(operation))
+        button_reverse.clicked.connect(self.button_reverse_clicked)
+        button_pow.clicked.connect(self.button_pow_clicked)
+        button_sqrt.clicked.connect(self.button_sqrt_clicked)
+        button_division.clicked.connect(lambda state, operation = "÷": self.button_operation_clicked(operation))
 
 
 
@@ -96,12 +96,11 @@ class Main(QDialog):
         layout_bottom_first.addWidget(button_dot, 3, 2)
 
         button_dot.clicked.connect(lambda state, num = ".": self.number_button_clicked(num))
-        #button_negate.clicked.connect(self.button_negate_clicked)
+        button_negate.clicked.connect(self.button_negate_clicked)
 
         for number in range(0, 10):
             number_button_dict[number] = QPushButtonNumber(str(number))
-            number_button_dict[number].clicked.connect(lambda state, num=number:
-                                                       self.number_button_clicked(num))
+            number_button_dict[number].clicked.connect(lambda state, num=number: self.number_button_clicked(num))
             if number > 0:
                 x, y = int(6/number), (number-1)%3
                 if number == 2:
@@ -131,7 +130,7 @@ class Main(QDialog):
         ### function - later
         button_plus.clicked.connect(lambda state, operation = "+": self.button_operation_clicked(operation))
         button_minus.clicked.connect(lambda state, operation = "-": self.button_operation_clicked(operation))
-        button_product.clicked.connect(lambda state, operation = "*": self.button_operation_clicked(operation))
+        button_product.clicked.connect(lambda state, operation = "x": self.button_operation_clicked(operation))
         button_equal.clicked.connect(self.button_equal_clicked)
 
 
@@ -161,127 +160,257 @@ class Main(QDialog):
     ### functions ###
     #################
 
+        self.entry = 0
         self.operand = 0
         self.result = 0
         self.operator = ""
-        self.entry = ""
-        self.temp = ""
         self.chkop = True
-        self.ce = False
         self.inputNum = False
+        self.enter = False
+        self.swap = False
+        self.bs = False
+
+    def is_int(self, n):
+        if n - int(n) < 0.0000001:
+            return int(n)
+        else:
+            return n
 
     def number_button_clicked(self, num):
-        if self.operator != "":
-            self.solution.setText("")
-        self.temp+=str(num)
-        print(f"num_button {self.ce}  {self.inputNum}  {self.temp}")
-        if self.ce and not self.inputNum and self.chkop:
-            self.equation.setText("")
+        if self.inputNum:
+            solution = ""
+            self.inputNum = False
+        elif self.enter:
             self.entry = self.operand
-            self.inputNum = True
+            solution = ""
+            self.equation.setText("")
+            self.enter = False
+            self.swap = True
+        else:
+            solution = "" if self.solution.text() == "0" else self.solution.text()
 
-        self.operand = int(self.temp)
-        self.solution.setText(self.temp)
-        self.chkop = True
+        if num == '.' and solution == "":
+            solution = "0"
+        solution += str(num)
+        self.operand = float(solution)
+        self.solution.setText(solution)
+        self.bs = True
+
+    def calculator(self, op, op2):
+        print("Check!", self.entry, self.operand, self.result)
+        print(str(11111.66666))
+        if self.operand:
+            if op == '+':
+                self.result = self.entry + self.operand
+            elif op == '-':
+                self.result = self.entry - self.operand
+            elif op == '÷':
+                self.entry = 1 if self.entry == 0 else self.entry
+                self.result = self.entry / self.operand
+                print(type(self.result))
+            elif op == 'x':
+                self.entry = 1 if self.entry == 0 else self.entry
+                self.result = self.entry * self.operand
+            else:
+                self.result = float(self.solution.text())
+
+            self.result = self.is_int(self.result)
+            self.equation.setText(str(self.result)+op2)
+            self.solution.setText(str(self.result))
+            self.entry = float(self.solution.text())
+
+        else:
+            return
 
     def button_operation_clicked(self, operation):
-        self.entry = "0" if self.entry == "" else self.entry
-        self.temp = "0" if self.temp == "" else self.temp
-        print(operation)
-        if not self.chkop == False and self.operator == "":
-            if operation == "+" :
-                self.result = int(self.entry)+self.operand
-                self.entry = str(self.result)
-            elif operation == "-" :
-                print(self.entry)
-                self.result = self.operand if self.entry == "0" else int(self.entry) - self.operand
-                self.entry = str(self.result)
-            elif operation == "*":
-                self.result = 1*self.operand
-                self.entry = str(self.result)
-        elif not self.chkop == False:
-            if self.operator == "+" :
-                self.result = int(self.entry)+self.operand
-                self.entry = str(self.result)
-            elif self.operator == "-" :
-                print(self.entry)
-                self.result = self.operand if self.entry == "0" else int(self.entry) - self.operand
-                self.entry = str(self.result)
-            elif self.operator == "*":
-                self.result = int(self.entry)*self.operand
-                self.entry = str(self.result)
+        if self.chkop:
+            equation = self.solution.text()
+            self.chkop = False
+        else:
+            equation = self.solution.text() if self.equation.text()=="" else self.equation.text()
 
-
-        print(self.entry + " cc " + str(self.operand) + "   " + str(self.result))
-
-        self.operator = operation
-        equation = self.temp if self.equation.text() =="" else self.entry
         equation += operation
         self.equation.setText(equation)
-        self.solution.setText(str(self.result))
-        self.temp = ""
-        self.chkop = False
 
+
+        self.calculator(self.operator, operation)
+
+        self.operator = operation
+        self.operand = 0
+        self.inputNum = True
+        self.chkop = True
+        self.bs = False
 
     def button_equal_clicked(self):
-        if self.inputNum:
-            self.temp = self.entry
-            self.entry = str(self.operand)
-            self.operand = int(self.temp)
-            self.temp = "0"
-            self.ce = False
-            self.inputNum = False
-        else:
-            self.ce = False
-        equation = self.entry + self.operator + str(self.operand) + "="
-        self.entry = "0" if self.entry=="" else self.entry
+        print(self.operator, self.entry, self.result, self.operand)
+        if self.operator == "":
+            self.result=self.operand
+            self.result=self.is_int(self.result)
+            self.equation.setText(str(self.result)+"=")
+            self.solution.setText(str(self.result))
+            return
+
+        self.entry = self.is_int(self.entry)
+        self.operand = self.is_int(self.operand)
+        if self.operand == 0:
+            self.result = self.entry
+            self.operand = self.entry
+        if self.swap:
+            self.result = self.operand
+            self.operand = self.entry
+            self.swap = False
+
+        self.entry = self.result
+        equation = str(self.result)+self.operator+str(self.operand)
+        equation+="="
+
+        print(self.result, self.entry, self.operand, self.operator, self.equation)
         if self.operator == "+":
-            self.result = int(self.entry)+self.operand
+            self.result = float(self.result) + self.operand
+        elif self.operator == "÷":
+            self.result = float(self.result) / self.operand
+        elif self.operator == "x":
+            self.result = float(self.result) * self.operand
         elif self.operator == "-":
-            self.result = int(self.entry)-self.operand
-        elif self.operator == "*":
-            self.result = int(self.entry)*self.operand
-        self.entry = str(self.result)
+            self.result = float(self.result) - self.operand
+
+        self.result = self.is_int(self.result)
+        print(self.entry)
         self.equation.setText(equation)
         self.solution.setText(str(self.result))
-        self.temp = ""
-        self.chkop = False
-        self.ce = True
-
-        print(f"{self.entry} + {self.operator} + {self.operand} + {self.result}")
-
+        self.enter = True
+        self.bs = True
 
     def button_clear_clicked(self):
+        self.entry = 0
         self.operand = 0
         self.result = 0
         self.operator = ""
-        self.entry = ""
-        self.temp = ""
         self.chkop = True
-        self.ce = False
         self.inputNum = False
+        self.enter = False
+        self.swap = False
         self.equation.setText("")
         self.solution.setText("0")
 
     def button_clear_entry_clicked(self):
-        self.result = 0
-        self.temp = ""
-        self.entry = "0"
+        print(self.entry, self.operand, self.result)
+
+        if self.enter:
+            self.entry = self.operand
+            self.result = 0
+            self.entry = 0
+
+            self.solution.setText("0")
+            self.equation.setText("")
+        else:
+            self.solution.setText("0")
+            self.operand = 0
         self.chkop = True
-        self.ce = True
-        self.equation.setText("")
-        self.solution.setText("0")
+        self.inputNum = False
+        self.enter = False
+        self.swap = False
+
+
+    def button_reverse_clicked(self):
+        equation = self.equation.text()
+        self.operand = self.is_int(self.operand)
+        equation += "1/("+str(self.operand)+")"
+        self.operand = 1/float(self.operand)
+        self.operand = self.is_int(self.operand)
+        self.solution.setText(str(self.operand))
+        self.equation.setText(equation)
+        self.bs = False
+    def button_pow_clicked(self):
+        if self.enter:
+            self.result = float(self.result) ** 2
+            self.result = self.is_int(self.result)
+            self.equation.setText("제곱")
+            self.solution.setText(str(self.result))
+        else:
+            self.operand = float(self.operand)**2
+            self.operand = self.is_int(self.operand)
+            self.solution.setText(str(self.operand))
+            self.equation.setText("제곱")
+        self.bs = False
+
+
+    def button_sqrt_clicked(self):
+        if self.enter:
+            self.result = float(self.result) ** 0.5
+            self.result = self.is_int(self.result)
+            self.equation.setText("제곱근")
+            self.solution.setText(str(self.result))
+        else:
+            self.operand = float(self.operand)**0.5
+            self.operand = self.is_int(self.operand)
+            self.solution.setText(str(self.operand))
+            self.equation.setText("제곱근")
+        self.bs = False
+
+    def button_per_clicked(self):
+        print(self.operator, self.entry, self.result, self.operand)
+        if self.operator=="x" or self.operator=="÷":
+            print("CHECK")
+            if self.enter:
+                print("CHECK1")
+                self.result = float(self.result) * 0.01
+                self.result = self.is_int(self.result)
+                self.equation.setText("퍼센트로 전환")
+                self.solution.setText(str(self.result))
+            else:
+                print("CHECK2")
+                self.operand = float(self.operand)*0.01
+                self.operand = self.is_int(self.operand)
+                self.solution.setText(str(self.operand))
+                self.equation.setText("퍼센트로 전환")
+        elif self.operator=="+" or self.operator == "-":
+            if self.enter:
+                print("CHECK1")
+                self.result = float(self.result) * float(self.result)
+                self.result = self.is_int(self.result)
+                self.equation.setText("퍼센트로 전환")
+                self.solution.setText(str(self.result))
+            else:
+                print("CHECK2")
+                self.operand = float(self.entry) * self.operand * 0.01
+                self.operand = self.is_int(self.operand)
+                self.solution.setText(str(self.operand))
+                self.equation.setText("퍼센트로 전환")
+        else:
+            self.operand = 0
+            self.solution.setText(str(self.operand))
+        self.bs = False
+
+    def button_negate_clicked(self):
+        if self.enter:
+            self.result = -self.result
+            self.result = self.is_int(self.result)
+            self.solution.setText(str(self.result))
+        elif self.operand==0:
+            self.operand = -self.entry
+            self.operand = self.is_int(self.operand)
+            self.solution.setText(str(self.operand))
+        else:
+            self.operand = -self.operand
+            self.operand = self.is_int(self.operand)
+            self.solution.setText(str(self.operand))
 
     def button_backspace_clicked(self):
-        if self.chkop and not self.temp == "":
-            self.operand = int(self.operand/10)
-            self.temp = "" if self.operand==0 else str(self.operand)
-            solution = "0" if len(self.solution.text()) == 1 else self.solution.text()[:-1]
-            self.solution.setText(solution)
+        if self.bs:
+            print("CHECK")
+            if self.enter:
+                self.equation.setText("")
+                self.enter = False
+            else:
+                solution = self.solution.text()
+                solution = solution[:-1]
+                if solution == "": solution = "0"
+                self.operand = float(solution)
+                print("CHECK", solution, self.operand)
+                self.solution.setText(solution)
         else:
-            self.equation.setText("")
-            self.temp = self.entry
-
+            return
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     main = Main()
