@@ -313,20 +313,35 @@ class Main(QDialog):
 
 
     def button_reverse_clicked(self):
-        equation = self.equation.text()
-        self.operand = self.is_int(self.operand)
-        equation += "1/("+str(self.operand)+")"
-        self.operand = 1/float(self.operand)
-        self.operand = self.is_int(self.operand)
-        self.solution.setText(str(self.operand))
-        self.equation.setText(equation)
+        if self.enter:
+            self.result = 1/self.result
+            self.result = self.is_int(self.result)
+            self.equation.setText("역수")
+            self.solution.setText(str(self.result))
+        elif self.operand == 0:
+            self.operand = 1/float(self.result)
+            self.operand = self.is_int(self.operand)
+            self.solution.setText(str(self.operand))
+            self.equation.setText("역수")
+        else:
+            print("CHECK", self.operand, self.result, self.entry)
+            self.operand = 1/float(self.operand)
+            self.operand = self.is_int(self.operand)
+            self.solution.setText(str(self.operand))
+            self.equation.setText("역수")
         self.bs = False
+
     def button_pow_clicked(self):
         if self.enter:
             self.result = float(self.result) ** 2
             self.result = self.is_int(self.result)
             self.equation.setText("제곱")
             self.solution.setText(str(self.result))
+        elif self.operand == 0:
+            self.operand = float(self.result)**2
+            self.operand = self.is_int(self.operand)
+            self.solution.setText(str(self.operand))
+            self.equation.setText("제곱")
         else:
             self.operand = float(self.operand)**2
             self.operand = self.is_int(self.operand)
@@ -341,6 +356,11 @@ class Main(QDialog):
             self.result = self.is_int(self.result)
             self.equation.setText("제곱근")
             self.solution.setText(str(self.result))
+        elif self.operand == 0:
+            self.operand = float(self.result)**0.5
+            self.operand = self.is_int(self.operand)
+            self.solution.setText(str(self.operand))
+            self.equation.setText("제곱근")
         else:
             self.operand = float(self.operand)**0.5
             self.operand = self.is_int(self.operand)
@@ -358,6 +378,11 @@ class Main(QDialog):
                 self.result = self.is_int(self.result)
                 self.equation.setText("퍼센트로 전환")
                 self.solution.setText(str(self.result))
+            elif self.operand == 0:
+                self.operand = float(self.result) * 0.01
+                self.operand = self.is_int(self.operand)
+                self.solution.setText(str(self.operand))
+                self.equation.setText("퍼센트로 전환")
             else:
                 print("CHECK2")
                 self.operand = float(self.operand)*0.01
@@ -371,6 +396,11 @@ class Main(QDialog):
                 self.result = self.is_int(self.result)
                 self.equation.setText("퍼센트로 전환")
                 self.solution.setText(str(self.result))
+            elif self.operand == 0:
+                self.operand = float(self.result) ** 2 * 0.01
+                self.operand = self.is_int(self.operand)
+                self.solution.setText(str(self.operand))
+                self.equation.setText("퍼센트로 전환")
             else:
                 print("CHECK2")
                 self.operand = float(self.entry) * self.operand * 0.01
