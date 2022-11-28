@@ -13,6 +13,10 @@ To execute the calculator, PyQt5 must be installed.
 ```
 python -m pip install pyqt5
 ```
+```
+파이참 사용시 file -> settings -> project:파일 명 -> python interpreter -> + 버튼 -> pyqt5 설치
+또는 run 설정 시 interpreter에서 설정
+```
 
 ## Built With
 
